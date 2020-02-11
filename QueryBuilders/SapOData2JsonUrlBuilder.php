@@ -142,7 +142,7 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
         $forceQuoteVals = [];
         
         foreach ($this->getValues() as $qpart) {
-            if ($this->needsQuotes($qpart) === true) {
+            if ($qpart->getDataAddress() && $this->needsQuotes($qpart) === true) {
                 $forceQuoteVals[] = $qpart->getDataAddress();
             }
         }
@@ -157,7 +157,15 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
             $pairs = [];
             $arr = (array) $serializableData;
             foreach ($arr as $p => $v) {
-                $pairs[] = '"' . $p . '":' . (in_array($p, $forceQuoteVals) || false === is_numeric($v) ? '"' . str_replace('"', '\"', $v) . '"' : $v);
+                switch (true) {
+                    case in_array($p, $forceQuoteVals):
+                    case (false === is_numeric($v) || (substr($v, 0, 1) === '0' && strlen($v) > 1)) && (is_bool($v) === false && strcasecmp($v, 'false') !== 0 && strcasecmp($v, 'true') !== 0):
+                        $escapedValue = json_encode($v);
+                        break;
+                    default:
+                        $escapedValue = $v;
+                }
+                $pairs[] = json_encode($p) . ':' . $escapedValue;
             }
             return '{' . implode(',', $pairs) . '}';
         } else {
@@ -172,7 +180,7 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
         $modelType = $qpart->getDataType();
         $odataType = $qpart->getDataAddressProperty('odata_type');
         switch (true) {
-            case $odataType  === 'Edm.Decimal': return true;
+            case $odataType === 'Edm.Decimal': return true;
             case $modelType instanceof StringDataType: return true;
         }
         return false;
