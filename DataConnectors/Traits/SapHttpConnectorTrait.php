@@ -65,6 +65,16 @@ trait SapHttpConnectorTrait
     /**
      *
      * {@inheritdoc}
+     * @see HttpConnector::getResponseErrorCode()
+     */
+    protected function getResponseErrorCode(ResponseInterface $response, \Throwable $exceptionThrown = null) : ?string
+    {
+        return $this->getErrorCode() ?? 'SAP-ERROR';
+    }
+    
+    /**
+     *
+     * {@inheritdoc}
      * @see HttpConnector::getResponseErrorText()
      */
     protected function getResponseErrorText(ResponseInterface $response, \Throwable $exceptionThrown = null) : string
