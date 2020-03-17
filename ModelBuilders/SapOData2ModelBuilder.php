@@ -6,6 +6,9 @@ use exface\Core\Interfaces\AppInterface;
 use exface\Core\Interfaces\DataSources\DataSourceInterface;
 use Symfony\Component\DomCrawler\Crawler;
 use exface\Core\Interfaces\Model\MetaObjectInterface;
+use exface\Core\Interfaces\DataTypes\DataTypeInterface;
+use exface\Core\CommonLogic\UxonObject;
+use exface\Core\DataTypes\NumberDataType;
 
 /**
  * Creates a meta model from SAP specific oData 2.0 $metadata.
@@ -117,5 +120,31 @@ class SapOData2ModelBuilder extends OData2ModelBuilder
     protected function findFunctionImports(string $entityType) : Crawler
     {
         return $this->getMetadata()->filterXPath('//default:FunctionImport[@sap:action-for="' . $this->getNamespace($entityType) . '.' . $entityType . '"]');
+    }
+    
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \exface\UrlDataConnector\ModelBuilders\OData2ModelBuilder::getDataTypeConfig()
+     */
+    protected function getDataTypeConfig(DataTypeInterface $type, \DOMElement $node) : UxonObject
+    {
+        $options = [];
+        switch (true) {
+            case $type instanceof NumberDataType:
+                if ($scale = $node->getAttribute('Scale')) {
+                    $options['precision'] = $scale;
+                }
+                
+                // There seems to be a bug in some versions of NetWeaver: precision gets the same
+                // version as scale, which results in a `max` of 1. This if simply ignores precision
+                // in this situation.
+                if ($precision = $node->getAttribute('Precision')) {
+                    if ($precision == $scale) {
+                        return $options;
+                    }
+                }
+        }
+        return parent::getDataTypeConfig($type, $node);
     }
 }
