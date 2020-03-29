@@ -257,7 +257,7 @@ class ITSmobile extends AbstractWidget implements CustomWidgetInterface, iHaveCo
      * {@inheritDoc}
      * @see \exface\Core\Interfaces\Widgets\iFillEntireContainer::getAlternativeContainerForOrphanedSiblings()
      */
-    public function getAlternativeContainerForOrphanedSiblings()
+    public function getAlternativeContainerForOrphanedSiblings() : ?iContainOtherWidgets
     {
         if ($this->getParent() && $this->getParent() instanceof iContainOtherWidgets) {
             return $this->getParent();
