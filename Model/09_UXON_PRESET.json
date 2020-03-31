@@ -53,7 +53,7 @@
     "rows": [
         {
             "CREATED_ON": "2019-09-29 20:05:19",
-            "MODIFIED_ON": "2019-09-30 08:37:50",
+            "MODIFIED_ON": "2020-03-31 17:06:00",
             "CREATED_BY_USER": "0x31000000000000000000000000000000",
             "MODIFIED_BY_USER": "0x31000000000000000000000000000000",
             "UID": "0x11e9e2f47553fd0dbacde4b318306b9a",
@@ -61,13 +61,13 @@
             "NAME": "SAP OData 2.0 Connection",
             "DESCRIPTION": "",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapOData2Connector.php",
-            "UXON": "{\"url\":\"\",\"sap_client\":\"\",\"user\":\"\",\"password\":\"\"}",
+            "UXON": "{\"url\":\"\",\"sap_client\":\"\",\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
             "WRAP_PATH": "",
             "UXON_SCHEMA": "connection"
         },
         {
             "CREATED_ON": "2019-09-29 20:32:36",
-            "MODIFIED_ON": "2019-09-30 08:37:24",
+            "MODIFIED_ON": "2020-03-31 17:07:21",
             "CREATED_BY_USER": "0x31000000000000000000000000000000",
             "MODIFIED_BY_USER": "0x31000000000000000000000000000000",
             "UID": "0x11e9e2f84500c053bacde4b318306b9a",
@@ -75,13 +75,13 @@
             "NAME": "SAP ADT SQL Connection",
             "DESCRIPTION": "",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapAdtSqlConnector.php",
-            "UXON": "{\"url\":\"\",\"sap_client\":\"\",\"user\":\"\",\"password\":\"\"}",
+            "UXON": "{\"url\":\"\",\"sap_client\":\"\",\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
             "WRAP_PATH": "",
             "UXON_SCHEMA": "connection"
         },
         {
             "CREATED_ON": "2020-01-08 19:36:41",
-            "MODIFIED_ON": "2020-01-08 19:36:41",
+            "MODIFIED_ON": "2020-03-31 17:06:31",
             "CREATED_BY_USER": "0x31000000000000000000000000000000",
             "MODIFIED_BY_USER": "0x31000000000000000000000000000000",
             "UID": "0x11ea324df24c17e89442e4b318306b9a",
@@ -89,13 +89,13 @@
             "NAME": "SAP OData Credentials with CLIENT",
             "DESCRIPTION": "Credential set for SAP OData connections with a user-specific client id",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapOData2Connector.php",
-            "UXON": "{\"sap_client\":\"\",\"user\":\"\",\"password\":\"\"}",
+            "UXON": "{\"sap_client\":\"\",\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
             "WRAP_PATH": "",
             "UXON_SCHEMA": "connection"
         },
         {
             "CREATED_ON": "2020-01-08 19:37:12",
-            "MODIFIED_ON": "2020-01-08 19:37:12",
+            "MODIFIED_ON": "2020-03-31 17:06:52",
             "CREATED_BY_USER": "0x31000000000000000000000000000000",
             "MODIFIED_BY_USER": "0x31000000000000000000000000000000",
             "UID": "0x11ea324e0516b4f09442e4b318306b9a",
@@ -103,7 +103,7 @@
             "NAME": "SAP OData Credentials",
             "DESCRIPTION": "Credential set for SAP OData connections with basic HTTP authentication",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapOData2Connector.php",
-            "UXON": "{\"user\":\"\",\"password\":\"\"}",
+            "UXON": "{\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
             "WRAP_PATH": "",
             "UXON_SCHEMA": "connection"
         }
