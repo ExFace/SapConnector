@@ -265,7 +265,7 @@ JS;
         $mobileJsPath = urlencode(gzdeflate( $baseUrl . '/sap/public/bc/its/mimes/itsmobile/99/scripts/all/mobile.js'));
         $this->getController()->addExternalModule('ITSmobileJS', $proxyUrl . '/url/'. $mobileJsPath);
         
-        $this->getController()->addExternalCss($this->getWorkbench()->getCMS()->buildUrlToInclude('exface/SapConnector/Facades/Css/theme99.css'), 'itsmobile_theme99');
+        $this->getController()->addExternalCss($this->getWorkbench()->getUrl() . 'vendor/exface/SapConnector/Facades/Css/theme99.css', 'itsmobile_theme99');
         return $this;
     }
     
