@@ -141,7 +141,7 @@ class SapOData2ModelBuilder extends OData2ModelBuilder
                 // in this situation.
                 if ($precision = $node->getAttribute('Precision')) {
                     if ($precision == $scale) {
-                        return $options;
+                        return new UxonObject($options);
                     }
                 }
         }
