@@ -9,9 +9,15 @@ use exface\UrlDataConnector\Psr7DataQuery;
 use exface\Core\Exceptions\DataSources\DataConnectionQueryTypeError;
 use exface\SapConnector\DataConnectors\Traits\SapHttpConnectorTrait;
 use exface\Core\Exceptions\DataSources\DataQueryFailedError;
+use exface\Core\CommonLogic\UxonObject;
+use exface\UrlDataConnector\DataConnectors\Authentication\HttpBasicAuth;
 
 /**
  * HTTP data connector for SAP oData 2.0 services.
+ * 
+ * This connector uses HTTP basic authentication by default. If you need another
+ * authentication type, use the `authentication` configuration property as described
+ * in the `HttpConnector`.
  * 
  * @author Andrej Kabachnik
  *
@@ -65,5 +71,27 @@ class SapOData2Connector extends OData2Connector
             }
             throw $e;
         }
+    }
+    
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \exface\UrlDataConnector\DataConnectors\HttpConnector::hasAuthentication()
+     */
+    protected function hasAuthentication() : bool
+    {
+        return true;
+    }
+    
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \exface\UrlDataConnector\DataConnectors\OData2Connector::getAuthProviderConfig()
+     */
+    protected function getAuthProviderConfig() : ?UxonObject
+    {
+        return parent::getAuthProviderConfig() ?? new UxonObject([
+            'class' => '\\' . HttpBasicAuth::class
+        ]);
     }
 }
