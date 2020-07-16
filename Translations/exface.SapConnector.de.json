@@ -1,6 +1,8 @@
 {
 	"ACTION.CALLODATA2OPERATION.SUCCESS": "Fertig!",
 	
+	"SECURITY.ASCII_PASSWORD_HINT": "Ihr passwort enthält Sonderzeichen (z.B. Umlaute), die von SAP-Schnittstellen nicht unterstützt werden. Bitte ändern Sie das Passwort in SAP so, dass es nur ASCII-Zeichen enthält!",
+	
 	"WIDGET.ITSMOBILE.F_KEYS": "F-Tasten",
 	"WIDGET.ITSMOBILE.F_KEY_BACK": "Zurück",
 	"WIDGET.ITSMOBILE.F_KEY_CONTINUE": "Weiter"
