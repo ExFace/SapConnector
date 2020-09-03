@@ -1,8 +1,6 @@
 {
 	"ACTION.CALLODATA2OPERATION.SUCCESS": "Done!",
 	
-	"SECURITY.ASCII_PASSWORD_HINT": "Your password contains special characters (e.g. \"umlauts\"), that are not supported by SAP webservices. Please change your password in SAP to contain ASCII characters only!",
-	
 	"WIDGET.ITSMOBILE.F_KEYS": "F-Keys",
 	"WIDGET.ITSMOBILE.F_KEY_BACK": "Back",
 	"WIDGET.ITSMOBILE.F_KEY_CONTINUE": "Continue"

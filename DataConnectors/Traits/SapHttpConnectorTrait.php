@@ -8,12 +8,11 @@ use exface\UrlDataConnector\Exceptions\HttpConnectorRequestError;
 use exface\UrlDataConnector\Psr7DataQuery;
 use exface\Core\CommonLogic\UxonObject;
 use exface\UrlDataConnector\DataConnectors\Authentication\HttpBasicAuth;
-use exface\Core\Exceptions\Security\AuthenticationFailedError;
 use exface\Core\CommonLogic\Security\AuthenticationToken\UsernamePasswordAuthToken;
 use exface\Core\Interfaces\Security\AuthenticationTokenInterface;
 use exface\Core\Interfaces\UserInterface;
 use exface\UrlDataConnector\Interfaces\HttpConnectionInterface;
-use exface\Core\Exceptions\RuntimeException;
+use exface\Core\Exceptions\DataSources\DataConnectionFailedError;
 
 /**
  * This trait adds support sap-client URL params and other SAP specifics to an HttpConnector.
@@ -192,15 +191,7 @@ trait SapHttpConnectorTrait
                 // If the password has non-ASCII characters, place a corresponding hint
                 // in the error
                 if (preg_match('/[^\x20-\x7e]/', $password)) {
-                    try {
-                        $errorText = $this->getWorkbench()->getApp('exface.SapConnector')->getTranslator()->translate('SECURITY.ASCII_PASSWORD_HINT');
-                    } catch (\Throwable $e) {
-                        $this->getWorkbench()->getLogger()->logException($e);
-                        $errorText = 'Unsupported characters (non-ASCII) detected in SAP-password. Please change the password in SAP!';
-                    }
-                    $e = new RuntimeException($errorText, '7BRNQYV');
-                    $e->setUseExceptionMessageAsTitle(true);
-                    throw $e;
+                    throw new DataConnectionFailedError($this, 'Unsupported characters (non-ASCII) detected in SAP-password. Please change the password in SAP!', '7BRNQYV');
                 }
             }
         }

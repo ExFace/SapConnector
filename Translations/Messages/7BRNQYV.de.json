@@ -1,0 +1,5 @@
+{
+    "TITLE": "Das SAP-Passwort enthält nicht unterstützte Zeichen (z.B. Umlaute)",
+    "HINT": "Bitte ändern Sie ihr Passwort in SAP so, dass es nur ASCII-Zeichen verwendet (lateinische Buchstaben und Sonderzeichen) - sonst ist keine Verbindung zu SAP möglich!",
+    "DESCRIPTION": null
+}
