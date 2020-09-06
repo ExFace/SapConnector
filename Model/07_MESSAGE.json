@@ -81,15 +81,15 @@
         },
         {
             "CREATED_ON": "2020-07-16 13:29:55",
-            "MODIFIED_ON": "2020-07-16 13:29:55",
+            "MODIFIED_ON": "2020-09-03 09:06:47",
             "CREATED_BY_USER": "0x31000000000000000000000000000000",
             "MODIFIED_BY_USER": "0x31000000000000000000000000000000",
             "UID": "0x11ea892570430cb089250205857feb80",
             "APP": "0x11e85942dc57e3ac99340205857feb80",
             "CODE": "7BRNQYV",
-            "TITLE": "Password contains unsupported characters",
+            "TITLE": "SAP-Password contains unsupported characters (e.g. \"umlauts\")",
             "DESCRIPTION": "SAP webservices only support ASCII passwords in most cases. While you can use non-ASCII characters in passwords to access SAP GUI, you can't use these passwords when connecting to SAP via webservice. \n\nThe simplest workaround is to change your password in SAP!",
-            "HINT": "Please make sure your password in SAP includes ASCII characters only!",
+            "HINT": "Please make sure your password in SAP includes ASCII characters only - otherwise no connection to SAP will be possible for this user!",
             "TYPE": "ERROR",
             "DOCS": ""
         }
