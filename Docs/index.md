@@ -2,6 +2,15 @@
 
 The SAP connector offers multiple options to use SAP systems as data sources.
 
+## Contents
+
+- [Connect via OData](Connecting_via_oData/index.md)
+	- [Creating an OData service in SAP](Creating_OData_services_in_SAP/index.md)
+- Connect via ADT SQL console
+- [Calling RFC function modules or BAPIs via SOAP](Connecting_via_RFC_webservice/index.md)
+- Connecto SAP HANA via ODBC
+- Remote control ITSmobile apps
+
 ## Using OData services
 
 oData web servcies are the preferred data sources for SAP UI5 (Fiori) apps. Being highly standardized RESTfull services, they are easy to import into the meta model. However, since the backend of each OData service is a custom implementation in SAP NetWeaver, the ease of use, performance, etc. largely depend to that implementation.
@@ -16,11 +25,7 @@ TODO
 
 ## Calling RFC function modules or BAPIs via SOAP web service
 
-Prefer good old battle-tested RFCs? There is a possibility to access plain old RFC function modules and even some BAPIs by configuring a SOAP webservice for them. Here is what you will need:
-
-1. [Set up the webserivce in SAP NetWeaver](Connecting_via_RFC_webservice/setting_up_rfc_webservice.md)
-2. Set up a data source and a connection in the metamodel
-3. [Create actions in the metamodel to call the RFC](Connecting_via_RFC_webservice/Modeling_RFC_actions.md)
+Prefer good old battle-tested RFCs? There is a possibility to access plain old RFC function modules and even some BAPIs by configuring a SOAP webservice for them. [Here is how](Connecting_via_RFC_webservice/index.md).
 
 ## SAP HANA ODBC connector
 
