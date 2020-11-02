@@ -155,8 +155,9 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
         } catch (RequestException $e) {
             $response = $response ?? $e->getResponse();
             $query = new Psr7DataQuery($request);
-            $query->setResponse($response);
-            if ($response === null) {
+            if ($response !== null) {
+                $query->setResponse($response);
+            } else {
                 throw $this->createResponseException($query, null, $e);
             }
             
