@@ -19,6 +19,9 @@ use exface\UrlDataConnector\Exceptions\HttpConnectorRequestError;
 /**
  * Data connector for the SAP ABAP Development Tools (ADT) SQL console webservice.
  * 
+ * This connector works with SAP's CSRF tokens - see https://a.kabachnik.info/how-to-use-sap-web-services-with-csrf-tokens-from-third-party-web-apps.html
+ * for more information about CSRF in SAP.
+ * 
  * @author Andrej Kabachnik
  *
  */
@@ -49,6 +52,11 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
         return rtrim(parent::getUrl(), "/") . '/sap/bc/adt/datapreview/';
     }
     
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \exface\UrlDataConnector\DataConnectors\HttpConnector::performQuery()
+     */
     protected function performQuery(DataQueryInterface $query)
     {
         if (($query instanceof SqlDataQuery) === false) {
@@ -115,7 +123,12 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
         
         return $query;
     }
-    
+
+    /**
+     * 
+     * @param Crawler $xmlCrawler
+     * @return int|NULL
+     */
     protected function extractTotalRowCounter(Crawler $xmlCrawler) : ?int
     {
         $totalRows = $xmlCrawler->filterXPath('//dataPreview:totalRows')->text();

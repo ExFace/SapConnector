@@ -9,6 +9,7 @@ use exface\UrlDataConnector\Psr7DataQuery;
 use exface\Core\Exceptions\DataSources\DataConnectionQueryTypeError;
 use exface\SapConnector\DataConnectors\Traits\SapHttpConnectorTrait;
 use exface\Core\Exceptions\DataSources\DataQueryFailedError;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * HTTP data connector for SAP oData 2.0 services.
@@ -16,6 +17,9 @@ use exface\Core\Exceptions\DataSources\DataQueryFailedError;
  * This connector uses HTTP basic authentication by default. If you need another
  * authentication type, use the `authentication` configuration property as described
  * in the `HttpConnector`.
+ * 
+ * This connector works with SAP's CSRF tokens - see https://a.kabachnik.info/how-to-use-sap-web-services-with-csrf-tokens-from-third-party-web-apps.html
+ * for more information about CSRF in SAP.
  * 
  * @author Andrej Kabachnik
  *
@@ -40,6 +44,16 @@ class SapOData2Connector extends OData2Connector
     /**
      * 
      * {@inheritDoc}
+     * @see CsrfTokenTrait::isCsrfRequired()
+     */
+    protected function isCsrfRequired(RequestInterface $request) : bool
+    {
+        return $request->getMethod() !== 'GET' && $request->getMethod() !== 'OPTIONS';
+    }
+    
+    /**
+     * 
+     * {@inheritDoc}
      * @see \exface\UrlDataConnector\DataConnectors\HttpConnector::performQuery()
      */
     protected function performQuery(DataQueryInterface $query)
@@ -48,11 +62,6 @@ class SapOData2Connector extends OData2Connector
             throw new DataConnectionQueryTypeError($this, 'Connector "' . $this->getAliasWithNamespace() . '" expects a Psr7DataQuery as input, "' . get_class($query) . '" given instead!');
         }
         /* @var $query \exface\UrlDataConnector\Psr7DataQuery */
-            
-        $request = $query->getRequest();
-        if ($request->getMethod() !== 'GET' && $request->getMethod() !== 'OPTIONS') {
-            $query->setRequest($this->addCsrfHeaders($request));
-        }
         
         try {
             $result = parent::performQuery($query);
@@ -61,7 +70,7 @@ class SapOData2Connector extends OData2Connector
         } catch (DataQueryFailedError $e) {
             if ($response = $e->getQuery()->getResponse()) {
                 /* var $response \Psr\Http\Message\ResponseInterface */
-                if ($this->csrfRetryCount === 0 && $response->getStatusCode() == 403 && $response->getHeader('x-csrf-token')[0] === 'Required') {
+                if ($this->isCsrfRequired($query->getRequest()) && $this->csrfRetryCount === 0 && $response->getStatusCode() == 403 && $response->getHeader('x-csrf-token')[0] === 'Required') {
                     $this->csrfRetryCount++;
                     $this->refreshCsrfToken();
                     return $this->performQuery($query);

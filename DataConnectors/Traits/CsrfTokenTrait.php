@@ -7,114 +7,139 @@ use exface\UrlDataConnector\Interfaces\HttpConnectionInterface;
 use exface\Core\Interfaces\Contexts\ContextManagerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
+use exface\UrlDataConnector\Psr7DataQuery;
+use function GuzzleHttp\Psr7\_caseless_remove;
+use exface\UrlDataConnector\DataConnectors\HttpConnector;
+use GuzzleHttp\Psr7\Request;
+use exface\Core\Exceptions\Security\AuthenticationFailedError;
+use exface\Core\Interfaces\UserInterface;
+use exface\Core\CommonLogic\AbstractDataConnector;
+use exface\Core\CommonLogic\UxonObject;
 
 /**
  * This trait adds support for CSRF-tokens to an HTTP connector.
  * 
- * If a request fails due to missing CSRF token, a new token is requested from the `csrf_request_url`.
- * This token is then saved in the current user session and added to every request via the
- * `X-CSRF-Token` header.
+ * The trait hooks in to the `addDefaultHeadersToQuery()` method of `HttpConnector` and adds CSRF
+ * related headers if required for the specific request (determined by `isCsrfRequired()`).
  * 
- * See https://a.kabachnik.info/how-to-use-sap-web-services-with-csrf-tokens-from-third-party-web-apps.html
- * for more information about CSRF in SAP.
+ * By default the CSRF headers are `X-CSRF-Token` and `Cookie`. These are stored in the session
+ * context. If they are not there, the trait will automatically perform `refreshCsrfToken()`
+ * sending a GET-request to the `csrf_request_url` and storing the response headers in the session.
  * 
  * @author Andrej Kabachnik
  *
  */
 trait CsrfTokenTrait
 {    
-    private $csrfToken = null;
+    /**
+     * 
+     * @var array|NULL
+     */
+    private $csrfHeaders = null;
     
-    private $csrfCookie = null;
-    
+    /**
+     * 
+     * @var string
+     */
     private $csrfRequestUrl = '';
     
     /**
-     *
-     * @return string
+     * 
+     * @param RequestInterface $request
+     * @return bool
      */
-    protected function getCsrfToken() : string
+    protected function isCsrfRequired(RequestInterface $request) : bool
     {
-        if ($this->csrfToken === null) {
-            $sessionToken = $this->getWorkbench()->getApp('exface.SapConnector')->getContextVariable($this->getCsrfTokenContextVarName(), ContextManagerInterface::CONTEXT_SCOPE_SESSION);
-            if ($sessionToken) {
-                $this->csrfToken = $sessionToken;
-            } else {
-                $this->refreshCsrfToken();
-            }
-        }
-        return $this->csrfToken;
-    }
-    
-    /**
-     *
-     * @return string
-     */
-    protected function getCsrfTokenContextVarName() : string
-    {
-        return 'csrf_token_' . $this->getCsrfRequestUrl();
-    }
-    
-    /**
-     *
-     * @param string $value
-     * @return HttpConnectionInterface
-     */
-    protected function setCsrfToken(string $value) : HttpConnectionInterface
-    {
-        $this->csrfToken = $value;
-        $this->getWorkbench()->getApp('exface.SapConnector')->setContextVariable($this->getCsrfTokenContextVarName(), $value, ContextManagerInterface::CONTEXT_SCOPE_SESSION);
-        return $this;
-    }
-    
-    /**
-    *
-    * @return string
-    */
-    protected function getCsrfCookie() : string
-    {
-        if ($this->csrfCookie === null) {
-            $sessionCookie = $this->getWorkbench()->getApp('exface.SapConnector')->getContextVariable($this->getCsrfCookieContextVarName(), ContextManagerInterface::CONTEXT_SCOPE_SESSION);
-            if ($sessionCookie) {
-                $this->csrfCookie = $sessionCookie;
-            } else {
-                $this->refreshCsrfToken();
-            }
-        }
-        return $this->csrfCookie;
+        return true;
     }
     
     /**
      * 
      * @return string
      */
-    protected function getCsrfCookieContextVarName() : string
+    protected function getCsrfContextVarName() : string
     {
-        return 'csrf_cookie_' . $this->getCsrfRequestUrl();
+        return 'csrf_' . $this->getId();
     }
     
     /**
-     *
-     * @param string $value
-     * @return HttpConnectionInterface
-     */
-    protected function setCsrfCookie(string $value) : HttpConnectionInterface
-    {
-        $this->csrfCookie = $value;
-        $this->getWorkbench()->getApp('exface.SapConnector')->setContextVariable($this->getCsrfCookieContextVarName(), $value, ContextManagerInterface::CONTEXT_SCOPE_SESSION);
-        return $this;
-    }
-    
-    /**
+     * Returns a PSR7 compatible array of request headers required for the CSRF check
      * 
      * @return array
      */
     protected function getCsrfHeaders() : array
     {
-        return [
-            'X-CSRF-Token' => $this->getCsrfToken(),
-            'Cookie' => $this->getCsrfCookie()
+        if ($this->csrfHeaders === null) {
+            $headers = null;
+            $ctxVar = $this->getWorkbench()->getApp('exface.SapConnector')->getContextVariable($this->getCsrfContextVarName(), ContextManagerInterface::CONTEXT_SCOPE_SESSION);
+            $ctxArray = $ctxVar !== null ? json_decode($ctxVar, true) : [];
+            if (! empty($ctxArray)) {
+                if ($ctxArray['hash'] === $this->getCsrfHash()) {
+                    $headers = $ctxArray['headers'];
+                } else {
+                    $this->unsetCsrfHeaders();
+                }
+            }
+            
+            if (is_array($headers) && ! empty($headers)) {
+                $this->csrfHeaders = $headers;
+            } else {
+                $this->refreshCsrfToken();
+            }
+        }
+        
+        return $this->csrfHeaders;
+    }
+    
+    /**
+     * Computes a hash of connection properties, changes of which should cause a token refresh.
+     * 
+     * By default, these properties are
+     * - url
+     * - csrf_request_url
+     * - authentication provider settings
+     * 
+     * The hash is stored together with the CSRF token and headers and used to detect changes in
+     * the configuration before every connection. If changes are detected, a new CSRF token is
+     * requested.
+     * 
+     * The authentication provider is not entirely part of the hash, but only it's `getDefaultRequestOptions()`
+     * because this is what is visible on "the other end" of the connection.
+     * 
+     * @return string
+     */
+    protected function getCsrfHash() : string
+    {
+        return md5($this->getUrl() . $this->getCsrfRequestUrl() . json_encode($this->getAuthProvider()->getDefaultRequestOptions([])));
+    }
+    
+    /**
+     * Replaces the CSRF token and other headers in the storage.
+     * 
+     * @param array $headers
+     * @return HttpConnectionInterface
+     */
+    protected function setCsrfHeaders(array $headers) : HttpConnectionInterface
+    {
+        $this->csrfHeaders = $headers;
+        $ctxArray = [
+            'hash' => $this->getCsrfHash(),
+            'headers' => $headers
         ];
+        $this->getWorkbench()->getApp('exface.SapConnector')->setContextVariable($this->getCsrfContextVarName(), json_encode($ctxArray), ContextManagerInterface::CONTEXT_SCOPE_SESSION);
+        return $this;
+    }
+    
+    /**
+     * Removes the CSRF token and other headers from the storage completely.
+     * 
+     * @return HttpConnectionInterface
+     */
+    protected function unsetCsrfHeaders() : HttpConnectionInterface
+    {
+        $this->csrfHeaders = null;
+        $this->getWorkbench()->getApp('exface.SapConnector')->unsetContextVariable($this->getCsrfContextVarName(), ContextManagerInterface::CONTEXT_SCOPE_SESSION);
+        return $this;
     }
     
     /**
@@ -131,69 +156,69 @@ trait CsrfTokenTrait
     }
     
     /**
-     *
+     * Requests a new CSRF token from the csrf_request_url and stores the relevant headers in
+     * the workbench's context.
+     * 
      * @param bool $retryOnError
      * @throws RequestException
      * @throws DataConnectionFailedError
-     * @return string
+     * @return string|NULL
      */
-    protected function refreshCsrfToken(bool $retryOnError = true) : string
+    protected function refreshCsrfToken(bool $retryOnError = true) : ?string
     {
         $token = null;
+        $csrfRequestError = null;
         try {
-            $response = $this->getClient()->get($this->getCsrfRequestUrl(), ['headers' => ['X-CSRF-Token' => 'Fetch']]);
+            $request = new Request('GET', $this->getCsrfRequestUrl(), ['headers' => ['X-CSRF-Token' => 'Fetch']]);
+            $response = $this->getClient()->send($request);
             $token = $response->getHeader('X-CSRF-Token')[0];
             $cookie = implode(';', $response->getHeader('Set-Cookie'));
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
+        } catch (RequestException $csrfRequestError) {
+            $response = $csrfRequestError->getResponse();
             // If there was an error, but there is no response (i.e. the error occurred before
             // the response was received), just rethrow the exception.
             if (! $response) {
-                throw $e;
+                throw $this->createResponseException(new Psr7DataQuery($request), null, $csrfRequestError);
             }
             $token = $response->getHeader('X-CSRF-Token')[0];
             $cookie = implode(';', $response->getHeader('Set-Cookie'));
         }
         
-        // Sometimes, SAP returns a 401 error although the authentication is performed, so the same
-        // request works perfectly well the second time. Just retry to see if this works.
-        // TODO why does the 401 come in the first place? Perhaps it has something to do with
-        // the session expiring...
-        if (! $token && $retryOnError === true && $response && $response->getStatusCode() == 401) {
-            try {
-                $token = $this->refreshCsrfToken(false);
-            } catch (\Throwable $re) {
-                $this->getWorkbench()->getLogger()->logException(new DataConnectionFailedError($this, 'Retry fetch CSRF token failed: ' . $this->getResponseErrorText($response), null, $re));
-            }
-        }
-        
         if (! $token) {
-            throw new DataConnectionFailedError($this, 'Cannot fetch CSRF token: ' . $this->getResponseErrorText($response) . '. See logs for more details!', null, $e);
+            $this->unsetCsrfHeaders();
+            if ($response->getStatusCode() == 401) {
+                throw $this->createAuthenticationException($csrfRequestError);
+            } else {
+                throw $this->createResponseException(new Psr7DataQuery($request), $response, new DataConnectionFailedError($this, 'Cannot fetch CSRF token: ' . $this->getResponseErrorText($response) . '. See logs for more details!', null, $csrfRequestError));
+            }
+        } else {
+            $this->setCsrfHeaders([
+                'X-CSRF-Token' => $token,
+                'Cookie' => $cookie
+            ]);
         }
-        
-        $this->setCsrfToken($token);
-        $this->setCsrfCookie($cookie);
         
         return $token;
     }
     
     /**
+     * Returns the URL to fetch the CSRF token from - relative to the base URL of the connection.
      * 
      * @return string
      */
     public function getCsrfRequestUrl() : string
     {
-        $url = $this->csrfRequestUrl;
+        $url = $this->csrfRequestUrl ?? '';
         
         if ($this->getFixedUrlParams() !== '') {
-            $url = $url . '?' . $this->getFixedUrlParams();
+            $url = $url . (strpos($url, '?') === false ? '?' : '&') . $this->getFixedUrlParams();
         }
         
         return $url;
     }
     
     /**
-     * The endpoint of the webservice to request a CSRF token (relative to `url`)
+     * The endpoint of the webservice to request a CSRF token (relative to `url` of the connection)
      * 
      * @uxon-property csrf_request_url
      * @uxon-type string
@@ -205,6 +230,34 @@ trait CsrfTokenTrait
     {
         $this->csrfRequestUrl = $urlRelativeToBase;
         return $this;
+    }
+    
+    /**
+     * Adds CSRF headers to the given PSR7 data query if required.
+     * 
+     * @see HttpConnector::addDefaultHeadersToQuery()
+     */
+    protected function addDefaultHeadersToQuery(Psr7DataQuery $query)
+    {
+        $query = parent::addDefaultHeadersToQuery($query);
+        if ($this->isCsrfRequired($query->getRequest())) {
+            $query->setRequest($this->addCsrfHeaders($query->getRequest()));
+        }
+        return $query;
+    }
+    
+    /**
+     * Once credentials are saved for this connection, make sure the CSRF headers are emptied.
+     * 
+     * @see AbstractDataConnector::saveCredentials()
+     */
+    protected function saveCredentials(UxonObject $uxon, string $credentialSetName = null, UserInterface $user = null, bool $credentialsArePrivate = null) : AbstractDataConnector
+    {
+        $result = parent::saveCredentials($uxon, $credentialSetName, $user, $credentialsArePrivate);
+        if ($user === null || $user->getUsername() === $this->getWorkbench()->getSecurity()->getAuthenticatedToken()->getUsername()) {
+            $this->unsetCsrfHeaders();
+        }
+        return $result;
     }
     
     /**
@@ -220,4 +273,16 @@ trait CsrfTokenTrait
      * @return string
      */
     abstract function getFixedUrlParams() : string;
+    
+    /**
+     * {@inheritdoc}
+     * @see HttpConnector::createResponseException()
+     */
+    protected abstract function createResponseException(Psr7DataQuery $query, ResponseInterface $response = null, \Throwable $exceptionThrown = null);
+
+    /**
+     * {@inheritdoc}
+     * @see HttpConnector::createAuthenticationException()
+     */
+    protected abstract function createAuthenticationException(\Throwable $exceptionThrown = null, string $message = null) : AuthenticationFailedError;
 }

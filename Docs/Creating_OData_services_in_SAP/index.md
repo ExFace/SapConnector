@@ -95,9 +95,11 @@ There are basically two options:
 
 	![Testing an OData service](Images/test_odata_service.png)
 
-11. You can test it now by pressing `SAP Gateway Client` in the left section below the table.
+11. You can test it now by pressing `SAP Gateway Client` for the corresponding ICF node in the left section below the table.
 
 	![SAP Gateway Client](Images/sap_gateway_client.png)
 
 You can also open the gateway client directly via `/n/iwfnd/gw_client`.
+
+**IMPORTANT:** You will need the URL to your OData service to create a data connection for the workbench. You can get the URL easily by clicking on `Call browser` for the ICF node in step 10 above. **But** be sure to use the ICF `ODATA` ICF node, not `SDATA` or others!
 
