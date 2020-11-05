@@ -169,7 +169,7 @@ trait CsrfTokenTrait
         $token = null;
         $csrfRequestError = null;
         try {
-            $request = new Request('GET', $this->getCsrfRequestUrl(), ['headers' => ['X-CSRF-Token' => 'Fetch']]);
+            $request = new Request('GET', $this->getCsrfRequestUrl(), ['X-CSRF-Token' => 'Fetch']);
             $response = $this->getClient()->send($request);
             $token = $response->getHeader('X-CSRF-Token')[0];
             $cookie = implode(';', $response->getHeader('Set-Cookie'));
