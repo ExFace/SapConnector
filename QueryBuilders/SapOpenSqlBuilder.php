@@ -24,6 +24,8 @@ use exface\Core\Exceptions\QueryBuilderException;
  * This query builder is based on the MySQL syntax, which is similar - see `MySqlBuilder` and
  * `AbstractSqlBuilder` for details and available configuration options.
  * 
+ * Supported dialect tags in multi-dialect statements (in order of priority): `@OpenSQL:`, `@MySQL:`, `@OTHER:`.
+ * 
  * ## Known issues
  * 
  * Attribute aliases MUST be uppercase - otherwise the data cannot be read!
@@ -43,6 +45,16 @@ class SapOpenSqlBuilder extends MySqlBuilder
         $forbidden = $this->getShortAliasForbiddenChars();
         $forbidden[] = '/';
         $this->setShortAliasForbiddenChars($forbidden);
+    }
+    
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \exface\Core\QueryBuilders\MySqlBuilder::getSqlDialects()
+     */
+    protected function getSqlDialects() : array
+    {
+        return array_merge(['OpenSQL'], parent::getSqlDialects());
     }
     
     /**
