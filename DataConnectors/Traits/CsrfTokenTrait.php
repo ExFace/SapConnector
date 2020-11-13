@@ -166,8 +166,10 @@ trait CsrfTokenTrait
      */
     protected function refreshCsrfToken(bool $retryOnError = true) : ?string
     {
+        $this->unsetCsrfHeaders();
         $token = null;
         $csrfRequestError = null;
+        
         try {
             $request = new Request('GET', $this->getCsrfRequestUrl(), ['X-CSRF-Token' => 'Fetch']);
             $response = $this->getClient()->send($request);
@@ -185,7 +187,6 @@ trait CsrfTokenTrait
         }
         
         if (! $token) {
-            $this->unsetCsrfHeaders();
             if ($response->getStatusCode() == 401) {
                 throw $this->createAuthenticationException($csrfRequestError);
             } else {

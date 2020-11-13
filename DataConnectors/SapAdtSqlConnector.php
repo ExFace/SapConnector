@@ -15,6 +15,7 @@ use exface\SapConnector\DataConnectors\Traits\CsrfTokenTrait;
 use exface\UrlDataConnector\Psr7DataQuery;
 use exface\SapConnector\DataConnectors\Traits\SapHttpConnectorTrait;
 use exface\UrlDataConnector\Exceptions\HttpConnectorRequestError;
+use exface\Core\Interfaces\Exceptions\AuthenticationExceptionInterface;
 
 /**
  * Data connector for the SAP ABAP Development Tools (ADT) SQL console webservice.
@@ -107,6 +108,9 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
             }
             $errorText = $response ? $this->getResponseErrorText($response, $e) : $e->getMessage();
             throw new DataQueryFailedError($query, $errorText, '6T2T2UI', $e);
+        } catch (AuthenticationExceptionInterface $e) {
+            $this->unsetCsrfHeaders();
+            throw $e;
         }
         
         $xml = new Crawler($response->getBody()->__toString());

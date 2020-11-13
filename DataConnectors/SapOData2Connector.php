@@ -10,6 +10,7 @@ use exface\Core\Exceptions\DataSources\DataConnectionQueryTypeError;
 use exface\SapConnector\DataConnectors\Traits\SapHttpConnectorTrait;
 use exface\Core\Exceptions\DataSources\DataQueryFailedError;
 use Psr\Http\Message\RequestInterface;
+use exface\Core\Interfaces\Exceptions\AuthenticationExceptionInterface;
 
 /**
  * HTTP data connector for SAP oData 2.0 services.
@@ -67,6 +68,9 @@ class SapOData2Connector extends OData2Connector
             $result = parent::performQuery($query);
             $this->csrfRetryCount = 0;
             return $result;
+        } catch (AuthenticationExceptionInterface $e) {
+            $this->unsetCsrfHeaders();
+            throw $e;
         } catch (DataQueryFailedError $e) {
             if ($response = $e->getQuery()->getResponse()) {
                 /* var $response \Psr\Http\Message\ResponseInterface */
