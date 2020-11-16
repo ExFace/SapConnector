@@ -13,6 +13,8 @@ use exface\Core\Interfaces\Security\AuthenticationTokenInterface;
 use exface\Core\Interfaces\UserInterface;
 use exface\UrlDataConnector\Interfaces\HttpConnectionInterface;
 use exface\Core\Exceptions\DataSources\DataConnectionFailedError;
+use exface\Core\Interfaces\Selectors\DataConnectorSelectorInterface;
+use exface\Core\CommonLogic\AbstractDataConnector;
 
 /**
  * This trait adds support sap-client URL params and other SAP specifics to an HttpConnector.
@@ -32,6 +34,16 @@ trait SapHttpConnectorTrait
         'h1', // generic NetWeaver errors
         '.errorTextHeader' // ITSmobile and older services errors
     ];
+    
+    /**
+     * 
+     * @see AbstractDataConnector::__construct()
+     */
+    public function __construct(DataConnectorSelectorInterface $prototypeSelector, UxonObject $config = null)
+    {
+        parent::__construct($prototypeSelector, $config);
+        $this->setAuthenticationRetryAfterFail(false);
+    }
     
     /**
      *
@@ -226,4 +238,6 @@ trait SapHttpConnectorTrait
     {
         return $this->allowUnicodePasswords;
     }
+    
+    abstract public function setAuthenticationRetryAfterFail(bool $value) : HttpConnectionInterface;
 }
