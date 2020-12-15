@@ -48,36 +48,58 @@
         {
             "name": "UXON_SCHEMA",
             "attribute_alias": "UXON_SCHEMA"
+        },
+        {
+            "name": "THUMBNAIL",
+            "attribute_alias": "THUMBNAIL"
         }
     ],
     "rows": [
         {
             "CREATED_ON": "2019-09-29 20:05:19",
-            "MODIFIED_ON": "2020-03-31 17:06:00",
+            "MODIFIED_ON": "2020-11-02 13:45:23",
             "CREATED_BY_USER": "0x31000000000000000000000000000000",
             "MODIFIED_BY_USER": "0x31000000000000000000000000000000",
             "UID": "0x11e9e2f47553fd0dbacde4b318306b9a",
             "APP": "0x11e85942dc57e3ac99340205857feb80",
             "NAME": "SAP OData 2.0 Connection",
-            "DESCRIPTION": "",
+            "DESCRIPTION": "Use absolute URL including path the the service and a trailing slash: e.g. `http:\/\/mysap:8000\/sap\/opu\/odata\/sap\/Z_MY_ODATA_SERVICE\/`",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapOData2Connector.php",
-            "UXON": "{\"url\":\"\",\"sap_client\":\"\",\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
+            "UXON": {
+                "url": "",
+                "sap_client": "",
+                "authentication": {
+                    "class": "\\exface\\UrlDataConnector\\DataConnectors\\Authentication\\HttpBasicAuth",
+                    "user": "",
+                    "password": ""
+                }
+            },
             "WRAP_PATH": "",
-            "UXON_SCHEMA": "connection"
+            "UXON_SCHEMA": "connection",
+            "THUMBNAIL": null
         },
         {
             "CREATED_ON": "2019-09-29 20:32:36",
-            "MODIFIED_ON": "2020-03-31 17:07:21",
+            "MODIFIED_ON": "2020-11-02 13:45:37",
             "CREATED_BY_USER": "0x31000000000000000000000000000000",
             "MODIFIED_BY_USER": "0x31000000000000000000000000000000",
             "UID": "0x11e9e2f84500c053bacde4b318306b9a",
             "APP": "0x11e85942dc57e3ac99340205857feb80",
             "NAME": "SAP ADT SQL Connection",
-            "DESCRIPTION": "",
+            "DESCRIPTION": "Use URL to you SAP instance without any path (e.g. `http:\/\/mysap:8000`)",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapAdtSqlConnector.php",
-            "UXON": "{\"url\":\"\",\"sap_client\":\"\",\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
+            "UXON": {
+                "url": "\/\/ REPLACE with URL to your SAP like http:\/\/mysap:8000",
+                "sap_client": "",
+                "authentication": {
+                    "class": "\\exface\\UrlDataConnector\\DataConnectors\\Authentication\\HttpBasicAuth",
+                    "user": "",
+                    "password": ""
+                }
+            },
             "WRAP_PATH": "",
-            "UXON_SCHEMA": "connection"
+            "UXON_SCHEMA": "connection",
+            "THUMBNAIL": null
         },
         {
             "CREATED_ON": "2020-01-08 19:36:41",
@@ -89,9 +111,17 @@
             "NAME": "SAP OData Credentials with CLIENT",
             "DESCRIPTION": "Credential set for SAP OData connections with a user-specific client id",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapOData2Connector.php",
-            "UXON": "{\"sap_client\":\"\",\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
+            "UXON": {
+                "sap_client": "",
+                "authentication": {
+                    "class": "\\exface\\UrlDataConnector\\DataConnectors\\Authentication\\HttpBasicAuth",
+                    "user": "",
+                    "password": ""
+                }
+            },
             "WRAP_PATH": "",
-            "UXON_SCHEMA": "connection"
+            "UXON_SCHEMA": "connection",
+            "THUMBNAIL": null
         },
         {
             "CREATED_ON": "2020-01-08 19:37:12",
@@ -103,9 +133,16 @@
             "NAME": "SAP OData Credentials",
             "DESCRIPTION": "Credential set for SAP OData connections with basic HTTP authentication",
             "PROTOTYPE": "exface\/SapConnector\/DataConnectors\/SapOData2Connector.php",
-            "UXON": "{\"authentication\":{\"class\":\"\\\\exface\\\\UrlDataConnector\\\\DataConnectors\\\\Authentication\\\\HttpBasicAuth\",\"user\":\"\",\"password\":\"\"}}",
+            "UXON": {
+                "authentication": {
+                    "class": "\\exface\\UrlDataConnector\\DataConnectors\\Authentication\\HttpBasicAuth",
+                    "user": "",
+                    "password": ""
+                }
+            },
             "WRAP_PATH": "",
-            "UXON_SCHEMA": "connection"
+            "UXON_SCHEMA": "connection",
+            "THUMBNAIL": null
         }
     ],
     "totals_rows": [],
