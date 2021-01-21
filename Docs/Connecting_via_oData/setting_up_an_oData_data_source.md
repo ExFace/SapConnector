@@ -11,7 +11,7 @@ Each OData service should be modeled as a sperate data source. The $metadata doc
 
 The only mandatory configuration option is the `url`, which should point to the root of your OData service. Make sure, it ends with a slash (e.g. `http://services.odata.org/V4/Northwind/Northwind.svc/`). However, setting `sap_client` explicitly is a good idea in most cases: if you amend this option, the OData service will determine the client by itself!
 
-The name and alias of your connection can be anything - refer to the general [data source documentation](https://github.com/exface/Core/blob/master/Docs/understanding_the_metamodel/data_sources_and_connections.md) for details.
+The name and alias of your connection can be anything - refer to the general [data source documentation](https://github.com/exface/core/blob/1.x-dev/Docs/understanding_the_metamodel/data_sources_and_connections.md) for details.
 
 ## Creating a data source
 
