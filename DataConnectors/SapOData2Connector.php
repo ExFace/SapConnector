@@ -93,7 +93,7 @@ class SapOData2Connector extends OData2Connector
     {
         $url = parent::getMetadataUrl();
         if (($sapClient = $this->getSapClient()) && stripos($url, 'sap-client=') === false) {
-            $url = (strpos($url, '?') === false ? '?' : '') . '?&sap-client=' . $sapClient;
+            $url .= (strpos($url, '?') === false ? '?' : '') . '&sap-client=' . $sapClient;
         }
         return $url;
     }
