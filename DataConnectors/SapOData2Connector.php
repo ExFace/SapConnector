@@ -87,6 +87,18 @@ class SapOData2Connector extends OData2Connector
     }
     
     /**
+     * @return string
+     */
+    public function getMetadataUrl()
+    {
+        $url = parent::getMetadataUrl();
+        if (($sapClient = $this->getSapClient()) && stripos($url, 'sap-client=') === false) {
+            $url = (strpos($url, '?') === false ? '?' : '') . '?&sap-client=' . $sapClient;
+        }
+        return $url;
+    }
+    
+    /**
      * 
      * {@inheritDoc}
      * @see \exface\UrlDataConnector\DataConnectors\OData2Connector::getAuthProviderConfig()
@@ -99,7 +111,10 @@ class SapOData2Connector extends OData2Connector
         if ($uxon !== null && is_a($uxon->getProperty('class'), '\\' . HttpBasicAuth::class, true)) {
             if ($sapClient = $this->getSapClient()) {
                 $authUrl = $uxon->getProperty('authentication_url') ?? $this->getMetadataUrl();
-                $uxon->setProperty('authentication_url', $authUrl . '?sap-client=' . $sapClient);
+                if (stripos($authUrl, 'sap-client=') === false) {
+                    $authUrl = (strpos($authUrl, '?') === false ? '?' : '') . '?&sap-client=' . $sapClient;
+                    $uxon->setProperty('authentication_url', $authUrl);
+                }
             }
         }
         
