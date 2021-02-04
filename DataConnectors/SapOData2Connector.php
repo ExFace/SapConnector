@@ -11,6 +11,8 @@ use exface\SapConnector\DataConnectors\Traits\SapHttpConnectorTrait;
 use exface\Core\Exceptions\DataSources\DataQueryFailedError;
 use Psr\Http\Message\RequestInterface;
 use exface\Core\Interfaces\Exceptions\AuthenticationExceptionInterface;
+use exface\UrlDataConnector\DataConnectors\Authentication\HttpBasicAuth;
+use exface\Core\CommonLogic\UxonObject;
 
 /**
  * HTTP data connector for SAP oData 2.0 services.
@@ -82,5 +84,25 @@ class SapOData2Connector extends OData2Connector
             }
             throw $e;
         }
+    }
+    
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \exface\UrlDataConnector\DataConnectors\OData2Connector::getAuthProviderConfig()
+     */
+    protected function getAuthProviderConfig() : ?UxonObject
+    {
+        $uxon = parent::getAuthProviderConfig();
+        
+        // Make sure to include &sap-client in the authentication URL if a client is specified!
+        if ($uxon !== null && is_a($uxon->getProperty('class'), '\\' . HttpBasicAuth::class, true)) {
+            if ($sapClient = $this->getSapClient()) {
+                $authUrl = $uxon->getProperty('authentication_url') ?? $this->getMetadataUrl();
+                $uxon->setProperty('authentication_url', $authUrl . '?sap-client=' . $sapClient);
+            }
+        }
+        
+        return $uxon;
     }
 }
