@@ -9,6 +9,7 @@ use exface\Core\DataTypes\StringDataType;
 use exface\UrlDataConnector\QueryBuilders\JsonUrlBuilder;
 use exface\Core\CommonLogic\QueryBuilder\QueryPartAttribute;
 use exface\Core\Exceptions\QueryBuilderException;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Query builder for SAP oData services in JSON format.
@@ -111,11 +112,11 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
     /**
      * 
      * {@inheritDoc}
-     * @see \exface\UrlDataConnector\QueryBuilders\AbstractUrlBuilder::buildRequestGet()
+     * @see \exface\UrlDataConnector\QueryBuilders\AbstractUrlBuilder::buildRequestToRead()
      */
-    protected function buildRequestGet()
+    public function buildRequestToRead(bool $doSelect = true, bool $doFilter = true, bool $doSort = true, bool $doPaginate = true, bool $doAggregate = true) : RequestInterface
     {
-        $request = parent::buildRequestGet();
+        $request = parent::buildRequestToRead($doSelect, $doFilter, $doSort, $doPaginate, $doAggregate);
         
         $method = $request->getMethod();
         if ($method !== 'POST' || $method !== 'PUT' || $method !== 'DELETE') {
@@ -178,7 +179,7 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
     protected function needsQuotes(QueryPartAttribute $qpart) : bool
     {
         $modelType = $qpart->getDataType();
-        $odataType = $qpart->getDataAddressProperty('odata_type');
+        $odataType = $qpart->getDataAddressProperty(OData2JsonUrlBuilder::DS_ODATA_TYPE);
         switch (true) {
             case $odataType === 'Edm.Decimal': return true;
             case $modelType instanceof StringDataType: return true;
