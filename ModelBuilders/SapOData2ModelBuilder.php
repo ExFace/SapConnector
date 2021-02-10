@@ -9,6 +9,7 @@ use exface\Core\Interfaces\Model\MetaObjectInterface;
 use exface\Core\Interfaces\DataTypes\DataTypeInterface;
 use exface\Core\CommonLogic\UxonObject;
 use exface\Core\DataTypes\NumberDataType;
+use exface\UrlDataConnector\QueryBuilders\AbstractUrlBuilder;
 
 /**
  * Creates a meta model from SAP specific oData 2.0 $metadata.
@@ -49,7 +50,7 @@ class SapOData2ModelBuilder extends OData2ModelBuilder
             }
             
             if (strtolower($entitySet->attr('sap:pageable')) === 'false') {
-                $data_address_props['request_remote_pagination'] = false;
+                $data_address_props[AbstractUrlBuilder::DAP_REQUEST_REMOTE_PAGINATION] = false;
             }
             $rows[$i]['DATA_ADDRESS_PROPS'] = json_encode($data_address_props);
         }
@@ -92,15 +93,15 @@ class SapOData2ModelBuilder extends OData2ModelBuilder
             // can be filtered or sorted over and no such properties at all if remote filtering and sorting
             // is supported
             if (strtolower($property->getAttribute('sap:filterable')) !== 'false') {
-                $data_address_props['filter_remote'] = 1;
+                $data_address_props[AbstractUrlBuilder::DAP_FILTER_REMOTE] = 1;
             } else {
-                $data_address_props['filter_locally'] = 1;
+                $data_address_props[AbstractUrlBuilder::DAP_FILTER_LOCALLY] = 1;
             }
             
             if (strtolower($property->getAttribute('sap:sortable')) !== 'false') {
-                $data_address_props['sort_remote'] = 1;
+                $data_address_props[AbstractUrlBuilder::DAP_SORT_REMOTE] = 1;
             } else {
-                $data_address_props['sort_locally'] = 1;
+                $data_address_props[AbstractUrlBuilder::DAP_SORT_LOCALLY] = 1;
             }
             
             if (! empty($data_address_props)) {

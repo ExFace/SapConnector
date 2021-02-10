@@ -179,7 +179,7 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
     protected function needsQuotes(QueryPartAttribute $qpart) : bool
     {
         $modelType = $qpart->getDataType();
-        $odataType = $qpart->getDataAddressProperty(OData2JsonUrlBuilder::DS_ODATA_TYPE);
+        $odataType = $qpart->getDataAddressProperty(OData2JsonUrlBuilder::DAP_ODATA_TYPE);
         switch (true) {
             case $odataType === 'Edm.Decimal': return true;
             case $modelType instanceof StringDataType: return true;
