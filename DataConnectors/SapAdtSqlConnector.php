@@ -213,7 +213,7 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
      * {@inheritDoc}
      * @see \exface\Core\Interfaces\DataSources\SqlDataConnectorInterface::runSql()
      */
-    public function runSql($string)
+    public function runSql($string, bool $multiquery = null)
     {
         $query = new SqlDataQuery();
         $query->setSql($string);
