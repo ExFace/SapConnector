@@ -425,5 +425,14 @@ XML;
     {
         return $this->error_message;
     }
+    
+    /**
+     *
+     * {@inheritDoc}
+     * @see \exface\Core\CommonLogic\AbstractAction::getEffects()
+     */
+    public function getEffects() : array
+    {
+        return array_merge(parent::getEffects(), $this->getEffectsFromModel());
+    }
 }
-?>
