@@ -91,7 +91,7 @@ class ITSmobile extends AbstractWidget implements CustomWidgetInterface, iHaveCo
      * {@inheritdoc}
      * @return \exface\Core\Interfaces\Widgets\CustomWidgetInterface::createFacadeElement()
      */
-    public function createFacadeElement(FacadeInterface $facade, $baseElement = null)
+    public function createFacadeElement(FacadeInterface $facade, $baseElement)
     {
         if ($facade instanceof UI5Facade) {
             return $this->createUI5Page($baseElement);
