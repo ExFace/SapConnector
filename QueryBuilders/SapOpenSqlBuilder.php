@@ -158,9 +158,9 @@ class SapOpenSqlBuilder extends MySqlBuilder
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlOrderBy()
      */
-    protected function buildSqlOrderBy(QueryPartSorter $qpart)
+    protected function buildSqlOrderBy(QueryPartSorter $qpart, $select_from = '') : string
     {
-        $sql = parent::buildSqlOrderBy($qpart);
+        $sql = parent::buildSqlOrderBy($qpart, $select_from);
         return str_replace([' ASC', ' DESC'], [' ASCENDING', ' DESCENDING'], $sql);
     }
     
@@ -179,7 +179,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
                 $output = $subject . " LIKE '%" . $this->escapeString($value) . "%'";
                 break;
             default:
-                $output = parent::buildSqlWhereComparator($subject, $comparator, $value, $data_type, $value_list_delimiter, $valueIsSQL);
+                $output = parent::buildSqlWhereComparator($subject, $comparator, $value, $data_type, $sql_data_type, $value_list_delimiter, $valueIsSQL);
         }
         
         // Add line breaks to IN statements (to avoid more than 255 characters per line)
