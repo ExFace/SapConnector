@@ -196,6 +196,10 @@ class SapOpenSqlBuilder extends MySqlBuilder
     protected function prepareWhereValue($value, DataTypeInterface $data_type, $sql_data_type = NULL)
     {
         switch (true) {
+            case $data_type instanceof BooleanDataType:
+                // The SAP-version of true is 'X' (abap_true), false is ' ' (abap_false) and NULL/undefined is '-'
+                $value = $data_type->parse($value);
+                return $value === true ? "'X'" : ($value === false ? "' '" : "'-'");
             case $data_type instanceof DateDataType:
                 $value = $data_type->parse($value);
                 return "'" . str_replace(['-', ' ', ':'], '', $value) . "'";
@@ -214,6 +218,10 @@ class SapOpenSqlBuilder extends MySqlBuilder
     protected function prepareInputValue($value, DataTypeInterface $data_type, $sql_data_type = NULL)
     {
         switch (true) {
+            case $data_type instanceof BooleanDataType:
+                // The SAP-version of true is 'X' (abap_true), false is ' ' (abap_false) and NULL/undefined is '-'
+                $value = $data_type->parse($value);
+                return $value === true ? "'X'" : ($value === false ? "' '" : "'-'");
             case $data_type instanceof DateDataType:
                 $value = $data_type->parse($value);
                 return "'" . str_replace(['-', ' ', ':'], '', $value) . "'";
