@@ -12,9 +12,6 @@ use exface\UrlDataConnector\Interfaces\HttpConnectionInterface;
 use exface\Core\Exceptions\RuntimeException;
 use exface\UrlDataConnector\Psr7DataQuery;
 use exface\Core\Facades\AbstractHttpFacade\AbstractHttpFacade;
-use exface\Core\Facades\AbstractHttpFacade\Middleware\AuthenticationMiddleware;
-use exface\Core\Facades\AbstractHttpFacade\HttpRequestHandler;
-use exface\Core\Facades\AbstractHttpFacade\OKHandler;
 
 /**
  * This facade is used by the exface.SapConnector.ITSmobile widget to remote control ITSmobile applications.
@@ -37,22 +34,10 @@ class ITSmobileProxyFacade extends AbstractHttpFacade
     /**
      *
      * {@inheritDoc}
-     * @see \Psr\Http\Server\RequestHandlerInterface::handle()
+     * @see \exface\Core\Facades\AbstractHttpFacade\AbstractHttpFacade::createResponse()
      */
-    public function handle(ServerRequestInterface $request) : ResponseInterface
+    protected function createResponse(ServerRequestInterface $request) : ResponseInterface
     {
-        if ($this->getWorkbench()->isStarted() === false) {
-            $this->getWorkbench()->start();
-        }
-        
-        // See if the request passes security middleware. If not, return the generated error.
-        $handler = new HttpRequestHandler(new OKHandler());
-        $handler->add(new AuthenticationMiddleware($this));
-        $responseTpl = $handler->handle($request);
-        if ($responseTpl->getStatusCode() >= 400) {
-            return $responseTpl;
-        }
-        
         $method = $request->getMethod();
         $uri = $request->getUri();
         $body = $request->getBody()->__toString();
