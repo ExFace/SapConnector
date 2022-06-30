@@ -23,15 +23,15 @@ use exface\Core\Exceptions\QueryBuilderException;
  *
  * This query builder is based on the MySQL syntax, which is similar - see `MySqlBuilder` and
  * `AbstractSqlBuilder` for details and available configuration options.
- * 
+ *
  * Supported dialect tags in multi-dialect statements (in order of priority): `@OpenSQL:`, `@MySQL:`, `@OTHER:`.
- * 
+ *
  * ## Known issues
- * 
+ *
  * Attribute aliases MUST be uppercase - otherwise the data cannot be read!
  *
  * @author Andrej Kabachnik
- *        
+ *
  */
 class SapOpenSqlBuilder extends MySqlBuilder
 {
@@ -48,7 +48,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\MySqlBuilder::getSqlDialects()
      */
@@ -58,7 +58,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * @return int
      */
     protected function getShortAliasMaxLength() : int
@@ -67,15 +67,15 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\MySqlBuilder::buildSqlQuerySelect()
      */
-    public function buildSqlQuerySelect()
+    public function buildSqlQuerySelect(int $buildRun = 0)
     {
-        return $this->translateToOpenSQL(parent::buildSqlQuerySelect());
+        return $this->translateToOpenSQL(parent::buildSqlQuerySelect($buildRun));
     }
-
+    
     
     /**
      *
@@ -89,7 +89,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     
     /**
      * Makes some text replacements to translate MySQL to OpenSQL
-     * 
+     *
      * @param string $query
      * @return string
      */
@@ -124,7 +124,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::getAliasDelim()
      */
@@ -134,7 +134,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * @param string $alias
      * @return string
      */
@@ -144,7 +144,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * @param string $alias
      * @return string
      */
@@ -154,7 +154,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlOrderBy()
      */
@@ -165,7 +165,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlWhereComparator()
      */
@@ -189,7 +189,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\MySqlBuilder::prepareWhereValue()
      */
@@ -211,7 +211,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::prepareInputValue($value, $data_type, $sql_data_type)
      */
@@ -236,8 +236,8 @@ class SapOpenSqlBuilder extends MySqlBuilder
      * Adds a wrapper to a select statement, that should take care of the returned value if the statement
      * itself returns null (like IFNULL(), NVL() or COALESCE() depending on the SQL dialect).
      *
-     * @param string $select_statement            
-     * @param string $value_if_null            
+     * @param string $select_statement
+     * @param string $value_if_null
      * @return string
      */
     protected function buildSqlSelectNullCheck($select_statement, $value_if_null)
@@ -246,16 +246,16 @@ class SapOpenSqlBuilder extends MySqlBuilder
             return $select_statement;
         }
         return 'COALESCE(' . $select_statement . ', ' . (is_numeric($value_if_null) ? $value_if_null : "'" . $value_if_null . "'") . ')';
-    } 
+    }
     
     /**
      * The OpenSQL builder cannot read attributes from reverse relations because OpenSQL
      * does not support subqueries in SELECT clauses - only in WHERE (as of 7.50).
-     * 
+     *
      * Since reversly related attributes cannot be read, they will be not part of
      * the main query and will produce subqueries on data sheet level (subsheets)
-     * with WHERE IN and GROUP BY. The results will then be joined in-memory. 
-     * 
+     * with WHERE IN and GROUP BY. The results will then be joined in-memory.
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::canReadAttribute()
      */
@@ -279,7 +279,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlGroupByExpression()
      */
@@ -373,12 +373,14 @@ class SapOpenSqlBuilder extends MySqlBuilder
     }
     
     /**
-     * 
+     *
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\MySqlBuilder::buildSqlQueryTotals()
      */
-    public function buildSqlQueryTotals()
+    public function buildSqlQueryTotals(int $buildRun = 0)
     {
+        $this->setDirty(false);
+        
         $totals_joins = array();
         $totals_core_selects = array();
         if (count($this->getTotals()) > 0) {
@@ -415,12 +417,19 @@ class SapOpenSqlBuilder extends MySqlBuilder
         
         $totals_query = "\n SELECT COUNT(*) AS EXFCNT" . ($totals_core_select ? ', ' . $totals_core_select : '') . ' FROM ' . $totals_from . $totals_join . $totals_where . $totals_group_by . $totals_having;
         
+        // See if changes to the query occur while the query was built (e.g. query parts are
+        // added for placeholders, etc.) and rerun the query builder if required.
+        // However, do not run it more than X times to avoid infinite recursion.
+        if ($this->isDirty() && $buildRun < self::MAX_BUILD_RUNS) {
+            return $this->buildSqlQueryTotals($buildRun+1);
+        }
+        
         return $this->translateToOpenSQL($totals_query);
     }
     
     /**
      * Comments seem to cause weired problems in OpenSQL - just remove them!
-     * 
+     *
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlComment()
      */
     protected function buildSqlComment(string $text) : string
