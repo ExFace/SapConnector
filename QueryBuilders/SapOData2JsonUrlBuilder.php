@@ -89,15 +89,21 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
             $dataType = $qpart->getDataType();
             switch (true) {
                 case $dataType instanceof DateDataType:
+                    $colKey = $qpart->getDataAddress();
                     foreach ($rows as $rowNr => $row) {
-                        $val = $row[$qpart->getDataAddress()];
-                        if (StringDataType::startsWith($val, '/Date(')) {
-                            $mil = substr($val, 6, -2);
-                            // FIXME should not round here. Otherwise real date values allways change
-                            // when an object is saved the first time after being created.
-                            $seconds = round($mil / 1000);
-                            $newVal = $dataType->parse($seconds);
-                            $rows[$rowNr][$qpart->getDataAddress()] = $newVal;
+                        $val = $row[$colKey];
+                        switch (true) {
+                            case StringDataType::startsWith($val, '/Date('):
+                                $mil = substr($val, 6, -2);
+                                // FIXME should not round here. Otherwise real date values allways change
+                                // when an object is saved the first time after being created.
+                                $seconds = round($mil / 1000);
+                                $newVal = $dataType->parse($seconds);
+                                $rows[$rowNr][$colKey] = $newVal;
+                                break;
+                            case StringDataType::startsWith($val, '@'):
+                                $rows[$rowNr][$colKey] = $dataType->parse($val);
+                                break;
                         }
                         
                     }
