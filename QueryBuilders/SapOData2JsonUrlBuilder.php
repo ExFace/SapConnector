@@ -98,7 +98,10 @@ class SapOData2JsonUrlBuilder extends OData2JsonUrlBuilder
                                 // FIXME should not round here. Otherwise real date values allways change
                                 // when an object is saved the first time after being created.
                                 $seconds = round($mil / 1000);
-                                $newVal = $dataType->parse($seconds);
+                                // FIXME why did this not work properly? The parsed value would be @10064543...
+                                // but for some reason UI5 tables would display "Invalid date"
+                                // $newVal = $dataType->parse($seconds);
+                                $newVal = $dataType::formatDateNormalized($dataType::cast($seconds,true));
                                 $rows[$rowNr][$colKey] = $newVal;
                                 break;
                             case StringDataType::startsWith($val, '@'):
