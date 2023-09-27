@@ -198,16 +198,16 @@ class SapOpenSqlBuilder extends MySqlBuilder
         switch (true) {
             case $data_type instanceof BooleanDataType:
                 // The SAP-version of true is 'X' (abap_true), false is ' ' (abap_false) and NULL/undefined is '-'
-                $value = $data_type->parse($value);
+                $value = $data_type::cast($value);
                 return $value === true ? "'X'" : ($value === false ? "' '" : "'-'");
             case $data_type instanceof DateDataType:
-                $value = $data_type->parse($value);
+                $value = $data_type::cast($value);
                 if (null !== $tz = $this->getTimeZoneInSQL($data_type::getTimeZoneDefault($this->getWorkbench()), $this->getTimeZone(), $dataAddressProps[static::DAP_SQL_TIME_ZONE] ?? null)) {
                     $value = $data_type::convertTimeZone($value, $data_type::getTimeZoneDefault($this->getWorkbench()), $tz);
                 }
                 return "'" . str_replace(['-', ' ', ':'], '', $value) . "'";
             case $data_type instanceof TimeDataType:
-                $value = $data_type->parse($value);
+                $value = $data_type::cast($value);
                 if (null !== $tz = $this->getTimeZoneInSQL($data_type::getTimeZoneDefault($this->getWorkbench()), $this->getTimeZone(), $dataAddressProps[static::DAP_SQL_TIME_ZONE] ?? null)) {
                     $value = $data_type::convertTimeZone($value, $data_type::getTimeZoneDefault($this->getWorkbench()), $tz);
                 }
@@ -221,7 +221,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\MySqlBuilder::prepareInputValue()
      */
-    protected function prepareInputValue($value, DataTypeInterface $data_type, array $dataAddressProps = [])
+    protected function prepareInputValue($value, DataTypeInterface $data_type, array $dataAddressProps = [], bool $parse = true)
     {
         switch (true) {
             case $data_type instanceof BooleanDataType:
@@ -241,7 +241,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
                 }
                 return "'" . str_replace([' ', ':'], '', $value) . "'";
         }
-        return parent::prepareWhereValue($value, $data_type, $dataAddressProps);
+        return parent::prepareInputValue($value, $data_type, $dataAddressProps, $parse);
     }
     
     /**
