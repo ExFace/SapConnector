@@ -42,7 +42,7 @@ class UI5ITSmobile extends UI5AbstractElement
 new sap.m.Page({
 	title: "{$this->getCaption()}",
 	showNavButton: {$showNavButton},
-	navButtonPress: [oController.onNavBack, oController],
+	navButtonPress: [oController.navBack, oController],
     headerContent: [
         {$this->buildJsHelpButtonConstructor($oControllerJs)}
     ],
