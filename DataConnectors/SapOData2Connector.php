@@ -17,6 +17,67 @@ use exface\Core\CommonLogic\UxonObject;
 /**
  * HTTP data connector for SAP oData 2.0 services.
  * 
+ * ## Handling SAP errors
+ * 
+ * SAP webservices provide errors in different formats depending on where they occur and
+ * how the inner logic of an OData service is built. This connector automatically handles
+ * the following cases depending on the HTTP response header `Content-Type`:
+ * 
+ * - JSON responses - typically received from logic inside an JSON OData services - the error text
+ * is retreived from `$.error.message.value`. See the subsection below for other options.
+ * - XML responses - in older HTTP endpoints like SOAP services or XML OData services - the value in
+ * the `<message>` tag is used for error text. See the subsection below for other options.
+ * - HTML responses - e.g. authentication errors - the top-most heading is used as error text (`<h1>`)
+ * 
+ * ### Exceptions in OData services
+ * 
+ * Exceptions thrown within the OData service are typically represented by an XML like the example
+ * below. In case of JSON OData the same structure is expressed in JSON. See 
+ * https://help.sap.com/doc/saphelp_nw75/7.5.5/DE-DE/95/fd2651c294256ee10000000a445394/frameset.htm
+ * for details.
+ * 
+ * ```
+ * <error xmlns="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+ *       <code>/IWBEP/CM_TEA/004</code>
+ *       <message xml:lang="en">'TEAM_012345678' is not in the defined range.</message>
+ *       <innererror>
+ *            <transactionid>4FE1D144B9AD22F2E10000000A420C41</transactionid>
+ *            <errordetails>
+ *                 <errordetail>
+ *                      <code>/IWBEP/CM_TEA/002</code>
+ *                      <message>'TEAM_012345678' is not a valid ID.</message>
+ *                      <propertyref>Team/Team_Identifier</propertyref>
+ *                      <severity>error</severity>
+ *                 </errordetail>
+ *                 <errordetail>
+ *                      <code>/IWBEP/CM_TEA/004</code>
+ *                      <message>Team ID 'TEAM_012345678' is not in the defined range.</message>
+ *                      <propertyref>Team/Team_Identifier</propertyref>
+ *                      <severity>error</severity>
+ *                 </errordetail>
+ *                 <errordetail>
+ *                      <code>/IWBEP/CX_TEA_BUSINESS</code>
+ *                      <message>'TEAM_012345678' is not a valid ID.</message>
+ *                      <propertyref/>
+ *                      <severity>error</severity>
+ *                 </errordetail>
+ *           </errordetails>
+ *      </innererror>
+ *  </error>
+ *  
+ * ```
+ * 
+ * This connector will use the values from `<code>` and `<message>` by default. However, you can also
+ * get the code and message from one of the `<errordetail>` sections. For example, for JSON repsponse 
+ * you can get the first message from `<errordetail>` by adding this line to the connection config:
+ * 
+ * ```
+ *  "error_text_pattern": "/\"message\"\\s?:\\s?\"(?<message>[^\"]*)\"/"
+ *  
+ * ```
+ * 
+ * ## Authentication
+ * 
  * This connector uses HTTP basic authentication by default. If you need another
  * authentication type, use the `authentication` configuration property as described
  * in the `HttpConnector`.
