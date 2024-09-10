@@ -254,7 +254,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
      */
     protected function buildSqlSelectNullCheck($select_statement, $value_if_null)
     {
-        if (true === $this->checkForSqlStatement($select_statement)) {
+        if (true === $this->isSqlStatement($select_statement)) {
             return $select_statement;
         }
         return 'COALESCE(' . $select_statement . ', ' . (is_numeric($value_if_null) ? $value_if_null : "'" . $value_if_null . "'") . ')';
