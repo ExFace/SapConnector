@@ -25,7 +25,7 @@ class SapHanaSqlBuilder extends MySqlBuilder
     protected function buildSqlGroupBy(\exface\Core\CommonLogic\QueryBuilder\QueryPart $qpart, $select_from = null)
     {
         $output = '';
-        if ($this->checkForSqlStatement($qpart->getAttribute()->getDataAddress())) {
+        if ($this->isSqlStatement($qpart->getAttribute()->getDataAddress())) {
             if (is_null($select_from)) {
                 $select_from = $qpart->getAttribute()->getRelationPath()->toString() ? $qpart->getAttribute()->getRelationPath()->toString() : $this->getMainObject()->getAlias();
             }
