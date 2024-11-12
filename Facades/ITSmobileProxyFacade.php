@@ -3,7 +3,6 @@ namespace exface\SapConnector\Facades;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use function GuzzleHttp\Psr7\stream_for;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Request;
 use exface\Core\DataTypes\StringDataType;
