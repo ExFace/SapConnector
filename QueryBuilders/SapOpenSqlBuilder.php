@@ -1,6 +1,7 @@
 <?php
 namespace exface\SapConnector\QueryBuilders;
 
+use exface\Core\CommonLogic\QueryBuilder\QueryPartFilter;
 use exface\Core\QueryBuilders\MySqlBuilder;
 use exface\Core\CommonLogic\QueryBuilder\QueryPartSorter;
 use exface\Core\Interfaces\DataTypes\DataTypeInterface;
@@ -169,7 +170,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlWhereComparator()
      */
-    protected function buildSqlWhereComparator($subject, $comparator, $value, DataTypeInterface $data_type, array $dataAddressProps = [], $value_list_delimiter = EXF_LIST_SEPARATOR, bool $valueIsSQL = false)
+    protected function buildSqlWhereComparator(QueryPartFilter $qpart, string $subject, string $comparator, $value, bool $rely_on_joins, bool $valueIsSQL = null) : string
     {
         switch ($comparator) {
             case EXF_COMPARATOR_IS_NOT:
@@ -179,7 +180,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
                 $output = $subject . " LIKE '%" . $this->escapeString($value) . "%'";
                 break;
             default:
-                $output = parent::buildSqlWhereComparator($subject, $comparator, $value, $data_type, $dataAddressProps, $value_list_delimiter, $valueIsSQL);
+                $output = parent::buildSqlWhereComparator($qpart, $subject, $comparator, $value, $rely_on_joins, $valueIsSQL);
         }
         
         // Add line breaks to IN statements (to avoid more than 255 characters per line)
@@ -313,7 +314,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
                 if (!$if_comp || is_null($if_val)) {
                     throw new QueryBuilderException('Invalid argument for COUNT_IF aggregator: "' . $cond . '"!', '6WXNHMN');
                 }
-                return "SUM( CASE WHEN " . $this->buildSqlWhereComparator($sql, $if_comp, $if_val, $qpart->getAttribute()->getDataType(), $qpart->getDataAddressProperties(), $qpart->getValueListDelimiter()). " THEN 1 ELSE 0 END )";
+                return "SUM( CASE WHEN " . $this->buildSqlWhereComparator($qpart, $sql, $if_comp, $if_val, false, false). " THEN 1 ELSE 0 END )";
             default:
                 return parent::buildSqlGroupByExpression($qpart, $sql, $aggregator);
         }
