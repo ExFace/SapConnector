@@ -1,6 +1,7 @@
 <?php
 namespace exface\SapConnector\DataConnectors;
 
+use exface\Core\Interfaces\DataSources\DataConnectionInterface;
 use exface\UrlDataConnector\DataConnectors\HttpConnector;
 use exface\SapConnector\ModelBuilders\SapAdtSqlModelBuilder;
 use exface\Core\CommonLogic\DataQueries\SqlDataQuery;
@@ -247,5 +248,19 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
         } else {
             return preg_replace('~[\x00\x0A\x0D\x1A\x22\x27\x5C]~u', '\\\$0', $string);
         }
+    }
+
+    
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \exface\Core\Interfaces\DataSources\SqlDataConnectorInterface::canJoin()
+     */
+    public function canJoin(DataConnectionInterface $otherConnection) : bool
+    {
+        if (! $otherConnection instanceof $this) {
+            return false;
+        }
+        return $this->getUrl() === $otherConnection->getUrl();
     }
 }
