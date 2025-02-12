@@ -8,8 +8,6 @@ use exface\Core\Interfaces\Contexts\ContextManagerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
 use exface\UrlDataConnector\Psr7DataQuery;
-use function GuzzleHttp\Psr7\_caseless_remove;
-use exface\UrlDataConnector\DataConnectors\HttpConnector;
 use GuzzleHttp\Psr7\Request;
 use exface\Core\Exceptions\Security\AuthenticationFailedError;
 use exface\Core\Interfaces\UserInterface;
