@@ -170,7 +170,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlWhereComparator()
      */
-    protected function buildSqlWhereComparator(QueryPartFilter $qpart, string $subject, string $comparator, $value, bool $rely_on_joins, bool $valueIsSQL = null) : string
+    protected function buildSqlWhereComparator(QueryPartFilter $qpart, string $subject, string $comparator, $value, bool $rely_on_joins, bool $valueIsSQL = null, DataTypeInterface $data_type = null) : string
     {
         switch ($comparator) {
             case EXF_COMPARATOR_IS_NOT:
@@ -180,7 +180,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
                 $output = $subject . " LIKE '%" . $this->escapeString($value) . "%'";
                 break;
             default:
-                $output = parent::buildSqlWhereComparator($qpart, $subject, $comparator, $value, $rely_on_joins, $valueIsSQL);
+                $output = parent::buildSqlWhereComparator($qpart, $subject, $comparator, $value, $rely_on_joins, $valueIsSQL, $data_type);
         }
         
         // Add line breaks to IN statements (to avoid more than 255 characters per line)
@@ -314,7 +314,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
                 if (!$if_comp || is_null($if_val)) {
                     throw new QueryBuilderException('Invalid argument for COUNT_IF aggregator: "' . $cond . '"!', '6WXNHMN');
                 }
-                return "SUM( CASE WHEN " . $this->buildSqlWhereComparator($qpart, $sql, $if_comp, $if_val, false, false). " THEN 1 ELSE 0 END )";
+                return "SUM( CASE WHEN " . $this->buildSqlWhereComparator($qpart, $sql, $if_comp, $if_val, false, false, $qpart->getAttribute()->getDataType()). " THEN 1 ELSE 0 END )";
             default:
                 return parent::buildSqlGroupByExpression($qpart, $sql, $aggregator);
         }
