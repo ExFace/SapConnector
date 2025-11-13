@@ -236,11 +236,20 @@ XML;
           
     protected function prepareParamValue(ServiceParameterInterface $parameter, $val) : ?string
     {
-        if ($parameter->hasDefaultValue() === true && $val === null) {
+        $type = $parameter->getDataType();
+
+        // If value is not there, use default
+        if ($val === null && $parameter->hasDefaultValue() === true) {
             $val = $parameter->getDefaultValue();
         }
+
+        // If value is empty, format it properly
+        if ($type::isValueEmpty($val) && null !== $emptyExpr = $parameter->getEmptyExpression()) {
+            $val = $emptyExpr->evaluate();
+        }
+        
         if ($val == null && $parameter->isRequired() === true) {
-            $value = 'Pflichtparameter ' . $parameter->getName() .  ' nicht angegeben';
+            $value = 'Required parameter ' . $parameter->getName() .  ' not set';
             $this->setErrorMessage($value);
         }
         if ($parameter->isEmpty() === true){
