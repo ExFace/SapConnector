@@ -32,6 +32,8 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
     use SapHttpConnectorTrait;
     use CsrfTokenTrait;
     
+    const SQL_DIALECT_OPENSQL = 'OpenSQL';
+    
     private $lastRowNumberUrlParam = null;
     
     /**
@@ -217,6 +219,7 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
     public function runSql($string, bool $multiquery = null)
     {
         $query = new SqlDataQuery();
+        $query->setDialect(self::SQL_DIALECT_OPENSQL);
         $query->setSql($string);
         return $this->query($query);
     }
@@ -249,7 +252,6 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
             return preg_replace('~[\x00\x0A\x0D\x1A\x22\x27\x5C]~u', '\\\$0', $string);
         }
     }
-
     
     /**
      * 
@@ -262,5 +264,15 @@ class SapAdtSqlConnector extends HttpConnector implements SqlDataConnectorInterf
             return false;
         }
         return $this->getUrl() === $otherConnection->getUrl();
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \exface\Core\Interfaces\DataSources\SqlDataConnectorInterface::getSqlDialect()
+     */
+    public function getSqlDialect(): string
+    {
+        return self::SQL_DIALECT_OPENSQL;
     }
 }
