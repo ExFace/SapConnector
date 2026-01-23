@@ -2,7 +2,7 @@
 
 Any OData service in SAP NetWeaver can be used as a data source. The more it adheres to the OData standard, the easier it is to use it and the less configuration you will need - see detailed recommendations below.
 
-If you want to use your data source to generate UI5/Fiori apps, that can run on NetWeaver - refer to the documentation of the [UI5Facade](https://github.com/exface/UI5Facade/blob/master/Docs/index.md).
+If you want to use your data source to generate UI5/Fiori apps, that can run on NetWeaver - refer to the documentation of the [UI5Facade](https://github.com/exface/ui5facade/blob/master/Docs/index.md).
 
 ## Walkthrough
 
