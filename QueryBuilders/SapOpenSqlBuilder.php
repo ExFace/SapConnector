@@ -170,8 +170,9 @@ class SapOpenSqlBuilder extends MySqlBuilder
      * {@inheritDoc}
      * @see \exface\Core\QueryBuilders\AbstractSqlBuilder::buildSqlWhereComparator()
      */
-    protected function buildSqlWhereComparator(QueryPartFilter $qpart, string $subject, string $comparator, $value, bool $rely_on_joins, bool $valueIsSQL = null, DataTypeInterface $data_type = null) : string
+    protected function buildSqlWhereComparator(QueryPartAttribute $qpart, string $subject, string $comparator, $value, bool $relyOnJoins, bool $valueIsSQL = null, DataTypeInterface $data_type = null) : string
     {
+        // TODO probably need to override buildSqlWhereComparatorPredicate() here instead of buildSqlWhereComparator()
         switch ($comparator) {
             case EXF_COMPARATOR_IS_NOT:
                 $output = $subject . " NOT LIKE '%" . $this->escapeString($value) . "%'";
@@ -180,7 +181,7 @@ class SapOpenSqlBuilder extends MySqlBuilder
                 $output = $subject . " LIKE '%" . $this->escapeString($value) . "%'";
                 break;
             default:
-                $output = parent::buildSqlWhereComparator($qpart, $subject, $comparator, $value, $rely_on_joins, $valueIsSQL, $data_type);
+                $output = parent::buildSqlWhereComparator($qpart, $subject, $comparator, $value, $relyOnJoins, $valueIsSQL, $data_type);
         }
         
         // Add line breaks to IN statements (to avoid more than 255 characters per line)
